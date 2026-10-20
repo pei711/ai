@@ -1,5 +1,11 @@
 # ai
 
+## 7.0.147
+
+### Patch Changes
+
+- 66e74dc: fix(ai): preserve repaired tool names in streamed UI message parts
+
 ## 7.0.146
 
 ### Patch Changes
