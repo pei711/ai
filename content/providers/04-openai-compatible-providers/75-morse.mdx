@@ -1,0 +1,130 @@
+---
+title: Morse
+description: Use the Morse OpenAI compatible API with the AI SDK.
+---
+
+# Morse Provider
+
+[Morse](https://trymorse.ai/inference) provides private, OpenAI-compatible
+inference for open-weight models from an open-source, attestable enclave. You
+can select a privacy tier per request (Private, TEE, or E2EE).
+
+You can use its Chat Completions endpoint with the AI SDK through the
+`@ai-sdk/openai-compatible` module.
+
+## Setup
+
+Install the OpenAI Compatible provider:
+
+<InstallPackages packages="@ai-sdk/openai-compatible" />
+
+Create an API key in the [Morse Console](https://console.trymorse.ai) and set it
+as an environment variable:
+
+```bash
+export MORSE_API_KEY=your-api-key
+```
+
+## Provider Instance
+
+Create a Morse provider instance with `createOpenAICompatible`:
+
+```ts
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+
+const morse = createOpenAICompatible({
+  name: 'morse',
+  apiKey: process.env.MORSE_API_KEY,
+  baseURL: 'https://inference.trymorse.ai/v1',
+});
+```
+
+The `apiKey` setting sends the key as a Bearer token in the `Authorization`
+header.
+
+## Language Models
+
+Create a language model by passing a model ID to the provider instance. Model
+IDs follow the `lab/model` format (such as `moonshotai/kimi-k3.1-pro`,
+`z-ai/glm-5.3-flash`, or `deepseek/deepseek-v4.1-flash`).
+
+The public [`GET /v1/models`](https://inference.trymorse.ai/v1/models) endpoint
+and the [Morse model catalog](https://trymorse.ai/inference/models) list the
+available models. For example:
+
+```ts
+const model = morse('moonshotai/kimi-k3.1-pro');
+```
+
+## Generate Text
+
+Use `generateText` to generate text with a model:
+
+```ts
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { generateText } from 'ai';
+
+const morse = createOpenAICompatible({
+  name: 'morse',
+  apiKey: process.env.MORSE_API_KEY,
+  baseURL: 'https://inference.trymorse.ai/v1',
+});
+
+const { text } = await generateText({
+  model: morse('moonshotai/kimi-k3.1-pro'),
+  prompt: 'Explain what confidential computing is in two sentences.',
+});
+
+console.log(text);
+```
+
+## Stream Text
+
+Use `streamText` to stream generated text:
+
+```ts
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { streamText } from 'ai';
+
+const morse = createOpenAICompatible({
+  name: 'morse',
+  apiKey: process.env.MORSE_API_KEY,
+  baseURL: 'https://inference.trymorse.ai/v1',
+});
+
+const result = streamText({
+  model: morse('moonshotai/kimi-k3.1-pro'),
+  prompt: 'Count from 1 to 5, separated by spaces.',
+});
+
+for await (const textPart of result.textStream) {
+  process.stdout.write(textPart);
+}
+```
+
+## Privacy Floor Option
+
+Morse allows specifying a minimum privacy tier (e.g. `'tee'`) for inference
+requests through `providerOptions.morse`:
+
+```ts
+const { text } = await generateText({
+  model: morse('moonshotai/kimi-k3.1-pro'),
+  prompt: 'Summarize the role of attestation in confidential AI.',
+  providerOptions: {
+    morse: {
+      provider: { min_privacy: 'tee' },
+    },
+  },
+});
+```
+
+Requests that cannot meet the specified privacy tier are rejected rather than
+routed to lower tiers.
+
+## Resources
+
+- [Morse AI SDK documentation](https://trymorse.ai/inference/docs/vercel-ai-sdk)
+- [Morse model catalog and pricing](https://trymorse.ai/inference/models)
+- [Morse Console](https://console.trymorse.ai)
+- [AI SDK OpenAI Compatible provider](/providers/openai-compatible-providers)
