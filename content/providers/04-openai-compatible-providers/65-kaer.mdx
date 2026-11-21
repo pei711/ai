@@ -1,0 +1,68 @@
+---
+title: Kaer
+description: Use the Kaer OpenAI compatible API with the AI SDK.
+---
+
+# Kaer Provider
+
+[Kaer](https://kaer.ai) provides an OpenAI-compatible Chat Completions API. You can use it with the AI SDK through the `@ai-sdk/openai-compatible` module.
+
+## Setup
+
+Install the OpenAI Compatible provider:
+
+<InstallPackages packages="@ai-sdk/openai-compatible" />
+
+Create a [Kaer API key](https://api.kaer.ai/docs/quickstart) and set it as a server-side environment variable:
+
+```bash
+export KAER_API_KEY=your-api-key
+```
+
+Kaer bills model calls based on token usage. See its [model catalog](https://api.kaer.ai/docs/models) for current models and pricing.
+
+## Provider Instance
+
+Create a Kaer provider instance with `createOpenAICompatible`:
+
+```ts
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+
+const kaer = createOpenAICompatible({
+  name: 'kaer',
+  apiKey: process.env.KAER_API_KEY,
+  baseURL: 'https://api.kaer.ai/v1',
+});
+```
+
+## Language Models
+
+Pass a Kaer model ID to the provider instance. For example, to use Janus 1.0 Flash:
+
+```ts
+const model = kaer('janus-1-flash');
+```
+
+### Example
+
+Use `generateText` to generate a response:
+
+```ts
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { generateText } from 'ai';
+
+const kaer = createOpenAICompatible({
+  name: 'kaer',
+  apiKey: process.env.KAER_API_KEY,
+  baseURL: 'https://api.kaer.ai/v1',
+});
+
+const { text } = await generateText({
+  model: kaer('janus-1-flash'),
+  prompt: 'Explain what an OpenAI-compatible API is in one sentence.',
+});
+
+console.log(text);
+```
+
+For available models and API details, see the [Kaer API documentation](https://api.kaer.ai/docs/openai).
